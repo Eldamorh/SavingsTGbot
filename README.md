@@ -4,6 +4,7 @@ This Python project is a Telegram bot using telebot and Django that contains use
 Each user can have savings of different types and amounts. Savings can be added, viewed and deleted.
 
 The bot name in Telegram is @arsenii_malko_bot (https://t.me/arsenii_malko_bot)
+Bot has 3 commands: /add_savings, /view_savings, /delete_savings
 
 ## Installation
 
