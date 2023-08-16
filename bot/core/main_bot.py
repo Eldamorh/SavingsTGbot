@@ -25,6 +25,20 @@ def handle_start(message):
 def handle_add_savings(message):
     user_id = message.chat.id
     bot.send_message(user_id, "Select savings type:", reply_markup=get_currency_keyboard())
+    bot.register_next_step_handler(message, add_savings_type)
+
+
+def add_savings_type(message):
+    user_id = message.chat.id
+    savings_type = message.text.upper()
+
+    if savings_type not in ['EUR', 'UAH', 'USD']:
+        bot.send_message(user_id, "Invalid savings type. Please enter EUR, UAH, or USD.",
+                         reply_markup=get_currency_keyboard())
+        bot.register_next_step_handler(message, add_savings_type)
+    else:
+        bot.send_message(user_id, "Enter savings amount:")
+        bot.register_next_step_handler(message, add_savings_amount, savings_type)
 
 
 def get_currency_keyboard():
@@ -33,17 +47,15 @@ def get_currency_keyboard():
     return keyboard
 
 
-@bot.message_handler(func=lambda message: message.text in ['EUR', 'UAH', 'USD'])
-def add_savings_type(message):
-    user_id = message.chat.id
-    savings_type = message.text
-    bot.send_message(user_id, "Enter savings amount:")
-    bot.register_next_step_handler(message, add_savings_amount, savings_type)
-
-
 def add_savings_amount(message, savings_type):
     user_id = message.chat.id
-    amount = float(message.text)
+
+    try:
+        amount = float(message.text)
+    except ValueError:
+        bot.send_message(user_id, "Invalid amount. Please enter a valid number.")
+        bot.register_next_step_handler(message, add_savings_amount, savings_type)
+
     user = User.objects.get(chat_id=user_id)
     Savings.objects.create(user=user, savings_type=savings_type, amount=amount)
     bot.send_message(user_id, f"Saved {amount} in {savings_type}.")
@@ -70,13 +82,12 @@ def handle_delete_savings(message):
 def confirm_delete(message):
     user_id = message.chat.id
     user = User.objects.get(chat_id=user_id)
-    savings_to_delete = message.text.split(" ")[1]
-
     try:
+        savings_to_delete = message.text.split(" ")[1]
         savings = Savings.objects.get(user=user, savings_type=savings_to_delete)
         savings.delete()
         bot.send_message(user_id, f"Deleted {savings_to_delete} ({savings.amount}).")
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, IndexError):
         bot.send_message(user_id, "Savings not found.")
 
 
