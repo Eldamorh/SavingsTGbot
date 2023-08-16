@@ -2,7 +2,7 @@
 
 This Python project is a Telegram bot using telebot and Django that contains user information and performs a simple function of calculating savings.
 Each user can have savings of different types and amounts. Savings can be added, viewed and deleted.
-This project has 2 models : Users and Savings
+
 The bot name in Telegram is @arsenii_malko_bot (https://t.me/arsenii_malko_bot)
 
 ## Installation
